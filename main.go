@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/google/gopacket"
 	layers "github.com/google/gopacket/layers"
+	"log"
 	"net"
 )
 
@@ -17,20 +18,28 @@ func main() {
 
 	//Listen on UDP Port
 	addr := net.UDPAddr{
-		Port: 8090,
-		IP:   net.ParseIP("127.0.0.1"),
+		Port: 53,
+		IP:   net.ParseIP("0.0.0.0"),
 	}
-	u, _ := net.ListenUDP("udp", &addr)
+	u, err := net.ListenUDP("udp", &addr)
+	if err != nil {
+		log.Fatalf("f0f008d0 FATAL error(%s)\n", err)
+	}
 
 	// Wait to get request on that port
 	for {
-		tmp := make([]byte, 1024)
-		_, addr, _ := u.ReadFrom(tmp)
-		clientAddr := addr
-		packet := gopacket.NewPacket(tmp, layers.LayerTypeDNS, gopacket.Default)
+		buf := make([]byte, 4096)
+		n, clientAddr, err := u.ReadFrom(buf)
+		if err != nil {
+			log.Printf("84ded1d7 ERROR err:%s, add:%s\n", err.Error(), clientAddr.String())
+			continue
+		}
+		buf = buf[:n]
+
+		packet := gopacket.NewPacket(buf, layers.LayerTypeDNS, gopacket.Default)
 		dnsPacket := packet.Layer(layers.LayerTypeDNS)
 		tcp, _ := dnsPacket.(*layers.DNS)
-		serveDNS(u, clientAddr, tcp)
+		go serveDNS(u, clientAddr, tcp)
 	}
 }
 
@@ -41,6 +50,7 @@ func serveDNS(u *net.UDPConn, clientAddr net.Addr, request *layers.DNS) {
 	var ip string
 	var err error
 	var ok bool
+	// TODO 根据域名来决定走墙内解析还是墙外解析
 	ip, ok = records[string(request.Questions[0].Name)]
 	if !ok {
 		//Todo: Log no data present for the IP and handle:todo
