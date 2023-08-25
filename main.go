@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/google/gopacket"
 	layers "github.com/google/gopacket/layers"
+	"github.com/shankusu2017/repeaterDNS/config"
 	"log"
 	"net"
 )
@@ -49,12 +50,9 @@ func serveDNS(u *net.UDPConn, clientAddr net.Addr, request *layers.DNS) {
 	dnsAnswer.Type = layers.DNSTypeA
 	var ip string
 	var err error
-	var ok bool
-	// TODO 根据域名来决定走墙内解析还是墙外解析
-	ip, ok = records[string(request.Questions[0].Name)]
-	if !ok {
-		//Todo: Log no data present for the IP and handle:todo
-	}
+
+	ip = config.GetDNSServerIP(string(request.Questions[0].Name))
+
 	a, _, _ := net.ParseCIDR(ip + "/24")
 	dnsAnswer.Type = layers.DNSTypeA
 	dnsAnswer.IP = a

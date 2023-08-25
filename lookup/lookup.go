@@ -1,4 +1,4 @@
-package main
+package lookup
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 )
 
 // host == www.google.com
-func lookupHost(host string) []string {
+func lookupHost(host, dns string) []string {
 	resolver := &net.Resolver{
 		PreferGo: true,
 		Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
