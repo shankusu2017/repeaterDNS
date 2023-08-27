@@ -3,28 +3,37 @@ package listener
 import (
 	"log"
 	"net"
+	"sync"
 )
 
-func Init() *net.UDPConn {
+var (
+	listener *net.UDPConn
+	instance sync.Once
+)
+
+func Init() {
+	instance.Do(initDo)
+}
+
+func initDo() {
 	// Listen on UDP Port
 	addr := net.UDPAddr{
 		Port: 53,
 		IP:   net.ParseIP("0.0.0.0"),
 	}
 
-	u, err := net.ListenUDP("udp", &addr)
+	var err error
+	listener, err = net.ListenUDP("udp", &addr)
 	if err != nil {
 		log.Fatalf("f0f008d0 FATAL listen(%s) fail, error(%s)\n", addr.String(), err)
 	}
-
-	return u
 }
 
-func Start(u *net.UDPConn, f func(net.Addr, []byte)) {
+func Start(f func(net.Addr, []byte)) {
 	// Wait to get request on that port
 	for {
 		buf := make([]byte, 4096)
-		n, clientAddr, err := u.ReadFrom(buf)
+		n, clientAddr, err := listener.ReadFrom(buf)
 		if err != nil {
 			log.Printf("84ded1d7 ERROR err:%s, add:%s\n", err.Error(), clientAddr.String())
 			continue
@@ -35,5 +44,5 @@ func Start(u *net.UDPConn, f func(net.Addr, []byte)) {
 }
 
 func Send(addr net.Addr, b []byte) {
-
+	listener.WriteTo(b, addr)
 }
