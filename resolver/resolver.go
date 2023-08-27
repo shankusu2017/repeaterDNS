@@ -9,6 +9,7 @@ import (
 	"github.com/shankusu2017/repeaterDNS/resolver/cache"
 	"github.com/shankusu2017/repeaterDNS/resolver/lookup"
 	"github.com/shankusu2017/utils"
+	"log"
 	"net"
 	"sync"
 )
@@ -60,12 +61,14 @@ func Resolve(clientAddr net.Addr, buf []byte) {
 	recode := cache.GetIP(string(domain))
 	if recode != nil {
 		ResolveDone(clientAddr, request, recode.GetRandIP())
+		log.Printf("INFO c7a8a141 resolved by cache, domain:%s, ip:%v\n", domain, recode.GetAllIP())
 		return
 	} else {
 		//
 		ips := lookup.LookUP(string(domain))
 		cache.SetIP(string(domain), ips)
 		ResolveDone(clientAddr, request, utils.SliceRandOne(ips))
+		log.Printf("INFO c7a8a141 ff7b7bcc by upServer, domain:%s, ip:%v\n", domain, ips)
 		return
 	}
 

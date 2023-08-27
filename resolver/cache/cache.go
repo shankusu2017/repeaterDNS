@@ -22,6 +22,10 @@ func (r *RecordT) GetRandIP() string {
 	return r.IP[i]
 }
 
+func (r *RecordT) GetAllIP() []string {
+	return r.IP
+}
+
 type cacheMgrT struct {
 	domain2recodeMap map[string]*RecordT
 	mtx              sync.RWMutex
