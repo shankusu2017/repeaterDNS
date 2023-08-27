@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/shankusu2017/repeaterDNS/config"
 	"github.com/shankusu2017/utils"
+	"log"
 	"net"
 	"strings"
 	"sync"
@@ -80,7 +81,7 @@ func lookupHost(domain, dns string) []string {
 	}
 	ips, err := resolver.LookupHost(context.Background(), domain)
 	if err != nil {
-		fmt.Println(err)
+		log.Printf("ERROR f69d570b lookupHost fail(%s)\n", err.Error())
 		return []string{}
 	}
 

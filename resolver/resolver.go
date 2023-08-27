@@ -68,7 +68,7 @@ func Resolve(clientAddr net.Addr, buf []byte) {
 		ips := lookup.LookUP(string(domain))
 		cache.SetIP(string(domain), ips)
 		ResolveDone(clientAddr, request, utils.SliceRandOne(ips))
-		log.Printf("INFO c7a8a141 ff7b7bcc by upServer, domain:%s, ip:%v\n", domain, ips)
+		log.Printf("INFO ff7b7bcc by upServer, domain: %s, ip: %v\n", domain, ips)
 		return
 	}
 
