@@ -44,7 +44,7 @@ func loopRcv(f func(net.Addr, []byte)) {
 		}
 		log.Printf("DEBUG 89aa4cad rcv request from:%s\n", clientAddr.String())
 		buf = buf[:n]
-		f(clientAddr, buf)
+		go f(clientAddr, buf)
 	}
 }
 
