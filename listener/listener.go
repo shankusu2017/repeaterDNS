@@ -30,7 +30,11 @@ func initDo() {
 }
 
 func Start(f func(net.Addr, []byte)) {
-	// Wait to get request on that port
+	go loopRcv(f)
+}
+
+func loopRcv(f func(net.Addr, []byte)) {
+	log.Printf("DEBUG 9d5ff164 listen start\n")
 	for {
 		buf := make([]byte, 4096)
 		n, clientAddr, err := listener.ReadFrom(buf)
