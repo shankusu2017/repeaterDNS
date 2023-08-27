@@ -5,13 +5,13 @@ import (
 	"time"
 )
 
-type recordT struct {
+type RecordT struct {
 	ip []string  // 域名对应的 ip
 	t  time.Time // 记录生成的时间(记录均有有效期)
 }
 
 type cacheMgrT struct {
-	domain2recodeMap map[string]*recordT
+	domain2recodeMap map[string]*RecordT
 	mtx              sync.Mutex
 }
 
@@ -22,7 +22,7 @@ var (
 
 func onlyOneTime() {
 	cacheMgr = new(cacheMgrT)
-	cacheMgr.domain2recodeMap = make(map[string]*recordT, 65536)
+	cacheMgr.domain2recodeMap = make(map[string]*RecordT, 65536)
 }
 
 func Init() {
