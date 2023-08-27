@@ -38,6 +38,7 @@ func Start(f func(net.Addr, []byte)) {
 			log.Printf("84ded1d7 ERROR err:%s, add:%s\n", err.Error(), clientAddr.String())
 			continue
 		}
+		log.Printf("DEBUG 89aa4cad rcv request from:%s\n", clientAddr.String())
 		buf = buf[:n]
 		f(clientAddr, buf)
 	}
