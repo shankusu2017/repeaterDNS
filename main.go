@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/shankusu2017/repeaterDNS/listener"
 	"github.com/shankusu2017/repeaterDNS/resolver"
+	"log"
 	"time"
 )
 
@@ -17,6 +18,7 @@ func main() {
 	resolver.Init()
 
 	listener.Init()
+	log.Printf("INFO f21ab893 init donw\n")
 	listener.Start(resolver.Resolve)
 
 	time.Sleep(time.Hour * 65536)

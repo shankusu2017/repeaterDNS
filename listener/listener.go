@@ -18,7 +18,7 @@ func Init() {
 func initDo() {
 	// Listen on UDP Port
 	addr := net.UDPAddr{
-		Port: 53,
+		Port: 1053,
 		IP:   net.ParseIP("0.0.0.0"),
 	}
 
