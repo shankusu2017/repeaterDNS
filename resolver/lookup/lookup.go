@@ -84,6 +84,6 @@ func lookupHost(domain, dns string) []string {
 		return []string{}
 	}
 
-	fmt.Println(ips)
+	fmt.Printf("INFO dceb27f4 domain:%s, dns:%v\n", domain, ips)
 	return ips
 }
