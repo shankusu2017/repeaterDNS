@@ -40,7 +40,7 @@ func ResolveDone(clientAddr net.Addr, request *layers.DNS, ip string) {
 	replyMess := request
 	replyMess.QR = true
 	replyMess.ANCount = 1
-	replyMess.OpCode = layers.DNSOpCodeNotify
+	replyMess.OpCode = layers.DNSOpCodeQuery
 	replyMess.AA = true
 	replyMess.Answers = append(replyMess.Answers, dnsAnswer)
 	replyMess.ResponseCode = layers.DNSResponseCodeNoErr
