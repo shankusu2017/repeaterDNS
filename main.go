@@ -16,8 +16,8 @@ func main() {
 
 	resolver.Init()
 
-	u := listener.Init()
-	listener.Start(u, resolver.Resolve)
+	listener.Init()
+	listener.Start(resolver.Resolve)
 
 	time.Sleep(time.Hour * 65536)
 }
