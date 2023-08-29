@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/shankusu2017/repeaterDNS/config"
 	"github.com/shankusu2017/repeaterDNS/listener"
-	"github.com/shankusu2017/repeaterDNS/resolver"
+	"github.com/shankusu2017/repeaterDNS/lookup"
 	"time"
 )
 
@@ -14,10 +14,10 @@ var (
 func main() {
 	config.InitNet(&cfg)
 
-	resolver.Init()
+	lookup.Init()
 
 	listener.Init()
-	listener.Start(resolver.Resolve)
+	listener.Start(lookup.Resolve)
 
 	time.Sleep(time.Hour * 65536)
 }

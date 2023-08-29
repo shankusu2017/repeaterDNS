@@ -1,15 +1,10 @@
 package config
 
 import (
-	"bufio"
 	"encoding/json"
-	"io"
 	"io/ioutil"
 	"log"
-	"math/rand"
 	"os"
-	"strings"
-	"time"
 )
 
 // ServerConfig 服务器配置
@@ -29,52 +24,6 @@ func InitNet(config *ServerConfig) {
 	if err != nil {
 		log.Fatalf("f6918311 Unmarshal [%v] fail, err(%s)\n", string(file[:]), err)
 	}
-}
-
-func InitConfig(domainCfgPath string) map[string]string {
-	if domainCfgPath == "" {
-		domainCfgPath = "./config/localDomain.conf"
-	}
-
-	rand.Seed(time.Now().UnixNano())
-
-	domainDnsMap := make(map[string]string, 65536)
-
-	fi, err := os.Open(domainCfgPath)
-	if err != nil {
-		log.Fatalf("FATAL bc360dee open config file(%s) err(%s)", domainCfgPath, err.Error())
-	}
-	defer fi.Close()
-
-	br := bufio.NewReader(fi)
-	for {
-		a, _, c := br.ReadLine()
-		if c == io.EOF {
-			break
-		}
-		line := string(a)
-		//server=/cn/223.5.5.5
-		//server=/acm.org/223.5.5.5
-		if strings.HasPrefix(line, "server=/") == false {
-			log.Fatalf("c772598d WARN invalid line:%s\n", line)
-		}
-		// 去掉 server=/
-		idx := len("server=/")
-		line = line[idx:]
-
-		mapInfo := strings.Split(line, "/")
-		if len(mapInfo) == 2 {
-			name := mapInfo[0]
-			dns := mapInfo[1]
-			domainDnsMap[name] = dns
-		} else {
-			log.Fatalf("FATAL d807d85f valid domain cfg:%s\n", mapInfo)
-		}
-	}
-
-	log.Printf("INFO a4347775 read %d domain info\n", len(domainDnsMap))
-
-	return domainDnsMap
 }
 
 func GetPublicDNS() []string {
