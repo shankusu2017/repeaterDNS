@@ -12,14 +12,10 @@ var (
 	instance sync.Once
 )
 
-func Init() {
-	// for future
-}
-
-func Start(cfg *config.ServerConfig, f func(net.Addr, []byte)) {
+func Init(cfg *config.ServerConfig) {
 	// Listen on UDP Port
 	addr := net.UDPAddr{
-		Port: cfg.GetRepeaterPort(),
+		Port: cfg.GetListenPort(),
 		IP:   net.ParseIP("0.0.0.0"),
 	}
 
@@ -28,7 +24,9 @@ func Start(cfg *config.ServerConfig, f func(net.Addr, []byte)) {
 	if err != nil {
 		log.Fatalf("f0f008d0 FATAL listen(%s) fail, error(%s)\n", addr.String(), err)
 	}
+}
 
+func StartLoop(f func(net.Addr, []byte)) {
 	go loopRcv(f)
 }
 
