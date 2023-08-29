@@ -14,6 +14,7 @@ type ServerConfig struct {
 	ServerMode   string `json:"ServerMode"`
 	RepeaterSrv  string `json:"RepeaterSrv"` // repeaterSrv
 	RepeaterPort int    `json:"RepeaterPort"`
+	Cache        bool   `json:"Cache"`
 }
 
 var (
@@ -37,6 +38,14 @@ func GetRepeaterSrvAddr() (string, int) {
 	return mainCfg.GetRepeaterSrv(), mainCfg.GetRepeaterPort()
 }
 
+func GetRandomPublicDNS() string {
+	return utils.SliceRandOne(publicDNS())
+}
+
+func IsCache() bool {
+	return mainCfg.Cache
+}
+
 func publicDNS() []string {
 	dns := []string{"8.8.8.8", "8.8.4.4", "1.1.1.1", "199.85.126.10",
 		"199.85.127.10", "208.67.222.222", "208.67.220.220", "84.200.69.80",
@@ -44,10 +53,6 @@ func publicDNS() []string {
 		"64.6.65.6", "192.95.54.3", "192.95.54.1", " 81.218.119.11",
 		"209.88.198.133"}
 	return dns
-}
-
-func GetRandomPublicDNS() string {
-	return utils.SliceRandOne(publicDNS())
 }
 
 func GetIV16() []byte {

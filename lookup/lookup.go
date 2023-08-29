@@ -164,6 +164,9 @@ func setRecord(domain string, rsp []byte) {
 		log.Printf("WARN 36430aed domain:%s, invalid.len:%d\n", domain, rsp)
 		return
 	}
+	if config.IsCache() == false {
+		return
+	}
 
 	record := new(RecordT)
 	record.t = time.Now()
