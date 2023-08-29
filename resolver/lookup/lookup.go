@@ -22,19 +22,20 @@ var (
 
 func Init() {
 	lookupMgr = new(lookupMgrT)
-	lookupMgr.domainDnsMap, lookupMgr.pubDNSServerIP = config.InitConfig("./config/localDomain.conf")
+	lookupMgr.domainDnsMap = config.InitConfig("./config/localDomain.conf")
+	lookupMgr.pubDNSServerIP = config.GetPublicDNS()
 }
 
 func findDNS(domain string) string {
-	dns, ok := fastFind(domain)
+	dns, ok := fastFindDNS(domain)
 	if ok {
 		return dns
 	}
 
-	return slowFind(domain)
+	return slowFindDNS(domain)
 }
 
-func fastFind(domain string) (string, bool) {
+func fastFindDNS(domain string) (string, bool) {
 	lookupMgr.mtx.Lock()
 	defer lookupMgr.mtx.Unlock()
 
@@ -42,7 +43,7 @@ func fastFind(domain string) (string, bool) {
 	return ip, ok
 }
 
-func slowFind(domain string) string {
+func slowFindDNS(domain string) string {
 	lookupMgr.mtx.Lock()
 	defer lookupMgr.mtx.Unlock()
 
@@ -57,13 +58,12 @@ func slowFind(domain string) string {
 	}
 
 	dns := utils.SliceRandOne(lookupMgr.pubDNSServerIP)
-
 	lookupMgr.domainDnsMap[domain] = dns
 
 	return dns
 }
 
-func Lookupv2(req []byte, domain string) []byte {
+func Lookup(req []byte, domain string) []byte {
 	dns := findDNS(domain)
 	addr := &net.UDPAddr{IP: net.ParseIP(dns), Port: 53}
 	udp, err := net.DialUDP("udp", nil, addr)

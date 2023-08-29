@@ -15,7 +15,6 @@ import (
 // ServerConfig 服务器配置
 type ServerConfig struct {
 	ServerMode   string `json:"ServerMode"`  // connect 还是 proxy
-	SubNet       int    `json:"SubNet"`      // 10.x.0.0 中的 这个 x
 	RepeaterSrv  string `json:"RepeaterSrv"` // repeaterSrv
 	RepeaterPort int    `json:"RepeaterPort"`
 }
@@ -32,7 +31,7 @@ func InitNet(config *ServerConfig) {
 	}
 }
 
-func InitConfig(domainCfgPath string) (map[string]string, []string) {
+func InitConfig(domainCfgPath string) map[string]string {
 	if domainCfgPath == "" {
 		domainCfgPath = "./config/localDomain.conf"
 	}
@@ -40,11 +39,6 @@ func InitConfig(domainCfgPath string) (map[string]string, []string) {
 	rand.Seed(time.Now().UnixNano())
 
 	domainDnsMap := make(map[string]string, 65536)
-	pubDNSServerIP := []string{"8.8.8.8", "8.8.4.4", "1.1.1.1", "199.85.126.10",
-		"199.85.127.10", "208.67.222.222", "208.67.220.220", "84.200.69.80",
-		"84.200.70.40", "8.26.56.26", "8.20.247.20", "64.6.64.6",
-		"64.6.65.6", "192.95.54.3", "192.95.54.1", " 81.218.119.11",
-		"209.88.198.133"}
 
 	fi, err := os.Open(domainCfgPath)
 	if err != nil {
@@ -80,7 +74,16 @@ func InitConfig(domainCfgPath string) (map[string]string, []string) {
 
 	log.Printf("INFO a4347775 read %d domain info\n", len(domainDnsMap))
 
-	return domainDnsMap, pubDNSServerIP
+	return domainDnsMap
+}
+
+func GetPublicDNS() []string {
+	dns := []string{"8.8.8.8", "8.8.4.4", "1.1.1.1", "199.85.126.10",
+		"199.85.127.10", "208.67.222.222", "208.67.220.220", "84.200.69.80",
+		"84.200.70.40", "8.26.56.26", "8.20.247.20", "64.6.64.6",
+		"64.6.65.6", "192.95.54.3", "192.95.54.1", " 81.218.119.11",
+		"209.88.198.133"}
+	return dns
 }
 
 func (srv *ServerConfig) IsConnectMode() bool {

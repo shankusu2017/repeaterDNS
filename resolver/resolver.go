@@ -36,7 +36,7 @@ func Resolve(clientAddr net.Addr, b []byte) {
 		log.Printf("INFO c7a8a141 resolved by cache, domain:%s, rsp:%v\n", domain, recode.GetRsp())
 		return
 	} else {
-		rsp := lookup.Lookupv2(b, domain)
+		rsp := lookup.Lookup(b, domain)
 		if len(rsp) > 0 {
 			cache.SetRecord(domain, rsp)
 		}
