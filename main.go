@@ -1,25 +1,23 @@
 package main
 
 import (
+	"github.com/shankusu2017/repeaterDNS/config"
 	"github.com/shankusu2017/repeaterDNS/listener"
 	"github.com/shankusu2017/repeaterDNS/resolver"
-	"log"
 	"time"
 )
 
-var records map[string]string
+var (
+	cfg config.ServerConfig
+)
 
 func main() {
-	records = map[string]string{
-		"baidu.com":  "223.143.166.121",
-		"github.com": "79.52.123.201",
-	}
+	config.InitNet(&cfg)
 
 	resolver.Init()
 
 	listener.Init()
-	log.Printf("INFO f21ab893 init done\n")
-	listener.Start(resolver.Resolvev2)
+	listener.Start(resolver.Resolve)
 
 	time.Sleep(time.Hour * 65536)
 }

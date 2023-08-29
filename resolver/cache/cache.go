@@ -2,28 +2,17 @@ package cache
 
 import (
 	"github.com/shankusu2017/constant"
-	"math/rand"
 	"sync"
 	"time"
 )
 
 type RecordT struct {
-	IP []string  // 域名对应的 IP
-	T  time.Time // 记录生成的时间(记录均有有效期)
+	recode []byte    // 域名对应的 dns 信息
+	t      time.Time // 记录生成的时间(记录均有有效期)
 }
 
-func (r *RecordT) GetRandIP() string {
-	if len(r.IP) == 0 {
-		return ""
-	}
-
-	ret := rand.Uint32()
-	i := (int)(ret) % len(r.IP)
-	return r.IP[i]
-}
-
-func (r *RecordT) GetAllIP() []string {
-	return r.IP
+func (r *RecordT) GetRsp() []byte {
+	return r.recode
 }
 
 type cacheMgrT struct {
@@ -40,19 +29,19 @@ func Init() {
 	cacheMgr.domain2recodeMap = make(map[string]*RecordT, constant.Size256K)
 }
 
-func GetIP(domain string) *RecordT {
+func GetRecord(domain string) *RecordT {
 	cacheMgr.mtx.RLock()
 	defer cacheMgr.mtx.RUnlock()
 
-	recode := cacheMgr.domain2recodeMap[domain]
-	return recode
+	record := cacheMgr.domain2recodeMap[domain]
+	return record
 }
 
-func SetIP(domain string, ip []string) {
+func SetRecord(domain string, rsp []byte) {
 	record := new(RecordT)
-	record.T = time.Now()
-	record.IP = make([]string, len(ip))
-	copy(record.IP[:], ip)
+	record.t = time.Now()
+	record.recode = make([]byte, len(rsp))
+	copy(record.recode[:], rsp)
 
 	cacheMgr.mtx.Lock()
 	defer cacheMgr.mtx.Unlock()

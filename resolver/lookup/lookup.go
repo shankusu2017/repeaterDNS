@@ -1,8 +1,6 @@
 package lookup
 
 import (
-	"context"
-	"fmt"
 	"github.com/shankusu2017/constant"
 	"github.com/shankusu2017/repeaterDNS/config"
 	"github.com/shankusu2017/utils"
@@ -25,12 +23,6 @@ var (
 func Init() {
 	lookupMgr = new(lookupMgrT)
 	lookupMgr.domainDnsMap, lookupMgr.pubDNSServerIP = config.InitConfig("./config/localDomain.conf")
-}
-
-func LookUP(domain string) []string {
-	dns := findDNS(domain)
-	ip := lookupHost(domain, dns)
-	return ip
 }
 
 func findDNS(domain string) string {
@@ -71,26 +63,8 @@ func slowFind(domain string) string {
 	return dns
 }
 
-// domain == www.google.com
-func lookupHost(domain, dns string) []string {
-	resolver := &net.Resolver{
-		PreferGo: true,
-		Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
-			d := net.Dialer{}
-			return d.DialContext(ctx, "udp", fmt.Sprintf("%s:53", dns))
-		},
-	}
-	ips, err := resolver.LookupHost(context.Background(), domain)
-	if err != nil {
-		log.Printf("ERROR f69d570b lookupHost fail(%s)\n", err.Error())
-		return []string{}
-	}
-
-	fmt.Printf("INFO dceb27f4 domain:%s, dns:%v\n", domain, ips)
-	return ips
-}
-
-func Lookupv2(req []byte, dns string) []byte {
+func Lookupv2(req []byte, domain string) []byte {
+	dns := findDNS(domain)
 	addr := &net.UDPAddr{IP: net.ParseIP(dns), Port: 53}
 	udp, err := net.DialUDP("udp", nil, addr)
 	if err != nil {
