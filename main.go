@@ -12,12 +12,12 @@ var (
 )
 
 func main() {
-	config.InitNet(&cfg)
+	config.Init(&cfg)
 
 	lookup.Init()
 
-	listener.Init()
-	listener.Start(lookup.Resolve)
+	listener.Init(&cfg)
+	listener.StartLoop(lookup.Resolve)
 
 	time.Sleep(time.Hour * 65536)
 }

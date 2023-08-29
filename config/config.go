@@ -9,6 +9,7 @@ import (
 
 // ServerConfig 服务器配置
 type ServerConfig struct {
+	ListenPort   int    `json:"ListenPort"`
 	RepeaterSrv  string `json:"RepeaterSrv"` // repeaterSrv
 	RepeaterPort int    `json:"RepeaterPort"`
 }
@@ -35,19 +36,23 @@ func GetPublicDNS() []string {
 }
 
 func (srv *ServerConfig) IsConnectMode() bool {
-	return srv.RepeaterPort == 53
+	return srv.ListenPort == 53
 }
 
 func (srv *ServerConfig) IsProxy() bool {
 	return !srv.IsConnectMode()
 }
 
-func (srv *ServerConfig) GetRepeaterPort() int {
-	return srv.RepeaterPort
+func (srv *ServerConfig) GetListenPort() int {
+	return srv.ListenPort
 }
 
 func (srv *ServerConfig) GetRepeaterSrv() string {
 	return srv.RepeaterSrv
+}
+
+func (srv *ServerConfig) GetRepeaterPort() int {
+	return srv.RepeaterPort
 }
 
 func selectConfigFile() string {
