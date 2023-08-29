@@ -2,7 +2,9 @@ package config
 
 import (
 	"bufio"
+	"encoding/json"
 	"io"
+	"io/ioutil"
 	"log"
 	"math/rand"
 	"os"
@@ -10,9 +12,29 @@ import (
 	"time"
 )
 
-func InitConfig(path string) (map[string]string, []string) {
-	if path == "" {
-		path = "./config/localDomain.conf"
+// ServerConfig 服务器配置
+type ServerConfig struct {
+	ServerMode   string `json:"ServerMode"`  // connect 还是 proxy
+	SubNet       int    `json:"SubNet"`      // 10.x.0.0 中的 这个 x
+	RepeaterSrv  string `json:"RepeaterSrv"` // repeaterSrv
+	RepeaterPort int    `json:"RepeaterPort"`
+}
+
+func InitNet(config *ServerConfig) {
+	srvCfg := selectConfigFile()
+	file, err := ioutil.ReadFile(srvCfg)
+	if err != nil {
+		log.Fatalf("f6918311 read %s fail, err(%s)\n", srvCfg, err)
+	}
+	err = json.Unmarshal(file[:], config)
+	if err != nil {
+		log.Fatalf("f6918311 Unmarshal [%v] fail, err(%s)\n", string(file[:]), err)
+	}
+}
+
+func InitConfig(domainCfgPath string) (map[string]string, []string) {
+	if domainCfgPath == "" {
+		domainCfgPath = "./config/localDomain.conf"
 	}
 
 	rand.Seed(time.Now().UnixNano())
@@ -24,9 +46,9 @@ func InitConfig(path string) (map[string]string, []string) {
 		"64.6.65.6", "192.95.54.3", "192.95.54.1", " 81.218.119.11",
 		"209.88.198.133"}
 
-	fi, err := os.Open(path)
+	fi, err := os.Open(domainCfgPath)
 	if err != nil {
-		log.Fatalf("FATAL bc360dee open config file(%s) err(%s)", path, err.Error())
+		log.Fatalf("FATAL bc360dee open config file(%s) err(%s)", domainCfgPath, err.Error())
 	}
 	defer fi.Close()
 
@@ -59,4 +81,38 @@ func InitConfig(path string) (map[string]string, []string) {
 	log.Printf("INFO a4347775 read %d domain info\n", len(domainDnsMap))
 
 	return domainDnsMap, pubDNSServerIP
+}
+
+func (srv *ServerConfig) IsConnectMode() bool {
+	return srv.ServerMode == "connect"
+}
+
+func (srv *ServerConfig) IsProxy() bool {
+	return srv.ServerMode == "proxy"
+}
+
+func (srv *ServerConfig) GetRepeaterPort() int {
+	return srv.RepeaterPort
+}
+
+func (srv *ServerConfig) GetRepeaterSrv() string {
+	return srv.RepeaterSrv
+}
+
+func selectConfigFile() string {
+	paths := []string{"config/server.cfg.first", "config/server.cfg", "config/server.cfg.bak"}
+	for _, path := range paths {
+		_, err := os.Stat(path) //os.Stat获取文件信息
+		if err == nil {
+			log.Printf("058de794 config file: %s\n", path)
+			return path
+		} else {
+			if os.IsNotExist(err) {
+				continue
+			}
+		}
+	}
+
+	log.Fatalf("FATAL 2806d49c config file is nil")
+	return ""
 }
