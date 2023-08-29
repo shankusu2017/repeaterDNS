@@ -1,7 +1,9 @@
 package config
 
 import (
+	"encoding/hex"
 	"encoding/json"
+	"github.com/shankusu2017/utils"
 	"io/ioutil"
 	"log"
 	"os"
@@ -9,10 +11,14 @@ import (
 
 // ServerConfig 服务器配置
 type ServerConfig struct {
-	ListenPort   int    `json:"ListenPort"`
+	ServerMode   string `json:"ServerMode"`
 	RepeaterSrv  string `json:"RepeaterSrv"` // repeaterSrv
 	RepeaterPort int    `json:"RepeaterPort"`
 }
+
+var (
+	mainCfg *ServerConfig
+)
 
 func Init(cfg *ServerConfig) {
 	srvCfg := selectConfigFile()
@@ -24,9 +30,14 @@ func Init(cfg *ServerConfig) {
 	if err != nil {
 		log.Fatalf("f6918311 Unmarshal [%v] fail, err(%s)\n", string(file[:]), err)
 	}
+	mainCfg = cfg
 }
 
-func GetPublicDNS() []string {
+func GetRepeaterSrvAddr() (string, int) {
+	return mainCfg.GetRepeaterSrv(), mainCfg.GetRepeaterPort()
+}
+
+func publicDNS() []string {
 	dns := []string{"8.8.8.8", "8.8.4.4", "1.1.1.1", "199.85.126.10",
 		"199.85.127.10", "208.67.222.222", "208.67.220.220", "84.200.69.80",
 		"84.200.70.40", "8.26.56.26", "8.20.247.20", "64.6.64.6",
@@ -35,16 +46,26 @@ func GetPublicDNS() []string {
 	return dns
 }
 
+func GetRandomPublicDNS() string {
+	return utils.SliceRandOne(publicDNS())
+}
+
+func GetIV16() []byte {
+	iv, _ := hex.DecodeString("daca11ed1f3fc59b2d233ec67cc6f028")
+	return iv[:]
+}
+
+func GetKey16() []byte {
+	key, _ := hex.DecodeString("ac5299e1424c188fdb618ee0ee5481f7")
+	return key[:]
+}
+
 func (srv *ServerConfig) IsConnectMode() bool {
-	return srv.ListenPort == 53
+	return srv.ServerMode != "proxy"
 }
 
 func (srv *ServerConfig) IsProxy() bool {
 	return !srv.IsConnectMode()
-}
-
-func (srv *ServerConfig) GetListenPort() int {
-	return srv.ListenPort
 }
 
 func (srv *ServerConfig) GetRepeaterSrv() string {

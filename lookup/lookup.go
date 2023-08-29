@@ -6,7 +6,7 @@ import (
 	"github.com/shankusu2017/repeaterDNS/config"
 	"github.com/shankusu2017/repeaterDNS/listener"
 	"github.com/shankusu2017/repeaterDNS/proto"
-	"github.com/shankusu2017/utils"
+	"github.com/shankusu2017/repeaterDNS/repeater"
 	"io"
 	"log"
 	"math/rand"
@@ -30,50 +30,42 @@ func (r *RecordT) IsExpired() bool {
 	return r.t.After(time.Now().Add(constant.Time30Min))
 }
 
+type domainT struct {
+	dns     string
+	isLocal bool
+}
+
+func (r *domainT) GetDns() string {
+	return r.dns
+}
+
+func (r *domainT) isLocalDomain() bool {
+	return r.isLocal
+}
+
 type lookupMgrT struct {
-	domain2DnsMap    map[string]string // 域名 ----> 负责解析此域名的 dns 服务器地址
-	pubDNSServerIP   []string          // 全球公开的 dns 地址
+	domain2DnsMap    map[string]*domainT // 域名 ----> 负责解析此域名的 dns 服务器地址
 	domain2RecodeMap map[string]*RecordT
 	mtx              sync.RWMutex
 }
 
 var (
 	lookupMgr *lookupMgrT
-	instance  sync.Once
 )
 
 func Init() {
-	instance.Do(initDo)
-}
-
-func initDo() {
 	lookupMgr = new(lookupMgrT)
 	lookupMgr.domain2DnsMap = initDomain2Dns("./config/localDomain.conf")
-	lookupMgr.pubDNSServerIP = config.GetPublicDNS()
-	lookupMgr.domain2RecodeMap = make(map[string]*RecordT, constant.Size256K)
+	lookupMgr.domain2RecodeMap = make(map[string]*RecordT, constant.Size1M)
 }
 
-func resolveDone(clientAddr net.Addr, rsp []byte) {
-	listener.Send(clientAddr, rsp)
-}
-
-func Resolve(clientAddr net.Addr, b []byte) {
-	request := proto.Buf2DNSReq(b)
-	domain := string(request.Questions[0].Name)
-	rsp := lookHost(b, domain)
-	if len(rsp) > 0 {
-		resolveDone(clientAddr, rsp)
-	}
-	log.Printf("INFO c7a8a141 resolved by cache, domain:%s, rsp:%s\n", domain, string(rsp))
-}
-
-func initDomain2Dns(domainCfgPath string) map[string]string {
+func initDomain2Dns(domainCfgPath string) map[string]*domainT {
 	rand.Seed(time.Now().UnixNano())
 	if domainCfgPath == "" {
 		domainCfgPath = "./config/localDomain.conf"
 	}
 
-	domainDnsMap := make(map[string]string, 65536)
+	domainDnsMap := make(map[string]*domainT, 65536)
 
 	fi, err := os.Open(domainCfgPath)
 	if err != nil {
@@ -101,7 +93,7 @@ func initDomain2Dns(domainCfgPath string) map[string]string {
 		if len(mapInfo) == 2 {
 			name := mapInfo[0]
 			dns := mapInfo[1]
-			domainDnsMap[name] = dns
+			domainDnsMap[name] = &domainT{dns: dns, isLocal: true}
 		} else {
 			log.Fatalf("FATAL d807d85f valid domain cfg:%s\n", mapInfo)
 		}
@@ -112,24 +104,25 @@ func initDomain2Dns(domainCfgPath string) map[string]string {
 	return domainDnsMap
 }
 
-func findDNS(domain string) string {
+func findDNS(domain string) (string, bool) {
 	dns, ok := fastFindDNS(domain)
 	if ok {
-		return dns
+		return dns.GetDns(), dns.isLocalDomain()
 	}
 
-	return slowFindDNS(domain)
+	dns = slowFindDNS(domain)
+	return dns.GetDns(), dns.isLocalDomain()
 }
 
-func fastFindDNS(domain string) (string, bool) {
+func fastFindDNS(domain string) (*domainT, bool) {
 	lookupMgr.mtx.Lock()
 	defer lookupMgr.mtx.Unlock()
 
-	ip, ok := lookupMgr.domain2DnsMap[domain]
-	return ip, ok
+	dns, ok := lookupMgr.domain2DnsMap[domain]
+	return dns, ok
 }
 
-func slowFindDNS(domain string) string {
+func slowFindDNS(domain string) *domainT {
 	lookupMgr.mtx.Lock()
 	defer lookupMgr.mtx.Unlock()
 
@@ -137,16 +130,16 @@ func slowFindDNS(domain string) string {
 	mapInfo := strings.Split(domain, ".")
 	for i := 1; i < len(mapInfo); i++ {
 		subDomain := strings.Join(mapInfo[i:], ".")
-		ip, ok := lookupMgr.domain2DnsMap[subDomain]
+		dns, ok := lookupMgr.domain2DnsMap[subDomain]
 		if ok {
-			return ip
+			return dns
 		}
 	}
 
-	dns := utils.SliceRandOne(lookupMgr.pubDNSServerIP)
-	lookupMgr.domain2DnsMap[domain] = dns
+	dns, _ := config.GetRepeaterSrvAddr()
+	lookupMgr.domain2DnsMap[domain] = &domainT{dns: dns, isLocal: false}
 
-	return dns
+	return lookupMgr.domain2DnsMap[domain]
 }
 
 func findRecord(domain string) *RecordT {
@@ -167,6 +160,11 @@ func findRecord(domain string) *RecordT {
 }
 
 func setRecord(domain string, rsp []byte) {
+	if len(rsp) <= 1 {
+		log.Printf("WARN 36430aed domain:%s, invalid.len:%d\n", domain, rsp)
+		return
+	}
+
 	record := new(RecordT)
 	record.t = time.Now()
 	record.recode = make([]byte, len(rsp))
@@ -183,34 +181,25 @@ func lookHost(req []byte, domain string) []byte {
 		return record.GetRsp()
 	}
 
-	dns := findDNS(domain)
-	addr := &net.UDPAddr{IP: net.ParseIP(dns), Port: 53}
-	udp, err := net.DialUDP("udp", nil, addr)
-	if err != nil {
-		log.Printf("ERROR deef8c7d error:%s\n", err.Error())
-		return []byte{}
+	var buf []byte
+	dns, isLocalDns := findDNS(domain)
+	if isLocalDns {
+		buf = repeater.SendReq2LocalAndRcvRsp(dns, req)
+	} else {
+		buf = repeater.SendReq2OutsideAndRcvRsp(req)
 	}
-
-	n, err := udp.Write(req)
-	if err != nil {
-		log.Printf("ERROR 69224d63 error:%s\n", err.Error())
-		return []byte{}
-	}
-
-	buf := make([]byte, constant.Size256K)
-	n, err = udp.Read(buf[:])
-	if err != nil {
-		log.Printf("ERROR d098e4a5 error:%s\n", err.Error())
-		return []byte{}
-	}
-	if n <= 0 {
-		log.Printf("ERROR d0984d63 error:%d\n", n)
-		return []byte{}
-	}
-
-	buf = buf[:n]
 
 	setRecord(domain, buf)
 
 	return buf
+}
+
+func Resolve(clientAddr net.Addr, b []byte) {
+	request := proto.Buf2DNSReq(b)
+	domain := string(request.Questions[0].Name)
+	rsp := lookHost(b, domain)
+	if len(rsp) > 0 {
+		listener.Send(clientAddr, rsp)
+	}
+	log.Printf("INFO c7a8a141 resolved by cache, domain:%s, rsp:%s\n", domain, string(rsp))
 }

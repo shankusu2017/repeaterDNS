@@ -1,7 +1,7 @@
 package listener
 
 import (
-	"github.com/shankusu2017/repeaterDNS/config"
+	"github.com/shankusu2017/constant"
 	"log"
 	"net"
 	"sync"
@@ -12,10 +12,10 @@ var (
 	instance sync.Once
 )
 
-func Init(cfg *config.ServerConfig) {
+func Init() {
 	// Listen on UDP Port
 	addr := net.UDPAddr{
-		Port: cfg.GetListenPort(),
+		Port: 53,
 		IP:   net.ParseIP("0.0.0.0"),
 	}
 
@@ -33,7 +33,7 @@ func StartLoop(f func(net.Addr, []byte)) {
 func loopRcv(f func(net.Addr, []byte)) {
 	log.Printf("DEBUG 9d5ff164 listen start\n")
 	for {
-		buf := make([]byte, 4096)
+		buf := make([]byte, constant.Size256K)
 		n, clientAddr, err := listener.ReadFrom(buf)
 		if err != nil {
 			log.Printf("84ded1d7 ERROR err:%s, add:%s\n", err.Error(), clientAddr.String())
