@@ -192,6 +192,8 @@ func lookHost(req []byte, domain string) []byte {
 		buf = repeater.SendReq2OutsideAndRcvRsp(req)
 	}
 
+	log.Printf("DEBUG 34d90af9 domain:%s, dns:%s\n", domain, dns)
+
 	setRecord(domain, buf)
 
 	return buf
