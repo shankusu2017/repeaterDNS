@@ -55,6 +55,11 @@ func ResolveDone(clientAddr net.Addr, request *layers.DNS, ip string) {
 	listener.Send(clientAddr, buffer.Bytes())
 }
 
+func Resolvev2(clientAddr net.Addr, b []byte) {
+	rsp := lookup.Lookupv2(b, "223.5.5.5")
+	listener.Send(clientAddr, rsp)
+}
+
 func Resolve(clientAddr net.Addr, buf []byte) {
 	request := proto.Buf2DNSReq(buf)
 	domain := request.Questions[0].Name

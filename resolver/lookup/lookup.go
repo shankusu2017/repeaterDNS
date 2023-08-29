@@ -3,6 +3,7 @@ package lookup
 import (
 	"context"
 	"fmt"
+	"github.com/shankusu2017/constant"
 	"github.com/shankusu2017/repeaterDNS/config"
 	"github.com/shankusu2017/utils"
 	"log"
@@ -87,4 +88,29 @@ func lookupHost(domain, dns string) []string {
 
 	fmt.Printf("INFO dceb27f4 domain:%s, dns:%v\n", domain, ips)
 	return ips
+}
+
+func Lookupv2(req []byte, dns string) []byte {
+	addr := &net.UDPAddr{IP: net.ParseIP(dns), Port: 53}
+	udp, err := net.DialUDP("udp", nil, addr)
+	if err != nil {
+		log.Printf("ERROR deef8c7d error:%s\n", err.Error())
+		return []byte{}
+	}
+
+	n, err := udp.Write(req)
+	if err != nil {
+		log.Printf("ERROR 69224d63 error:%s\n", err.Error())
+		return []byte{}
+	}
+
+	buf := make([]byte, constant.Size256K)
+	n, err = udp.Read(buf[:])
+	if err != nil {
+		log.Printf("ERROR d098e4a5 error:%s\n", err.Error())
+		return []byte{}
+	}
+
+	buf = buf[:n]
+	return buf
 }

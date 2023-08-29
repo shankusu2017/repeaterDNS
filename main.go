@@ -19,7 +19,7 @@ func main() {
 
 	listener.Init()
 	log.Printf("INFO f21ab893 init done\n")
-	listener.Start(resolver.Resolve)
+	listener.Start(resolver.Resolvev2)
 
 	time.Sleep(time.Hour * 65536)
 }
