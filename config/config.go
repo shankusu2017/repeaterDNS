@@ -9,18 +9,17 @@ import (
 
 // ServerConfig 服务器配置
 type ServerConfig struct {
-	ServerMode   string `json:"ServerMode"`  // connect 还是 proxy
 	RepeaterSrv  string `json:"RepeaterSrv"` // repeaterSrv
 	RepeaterPort int    `json:"RepeaterPort"`
 }
 
-func InitNet(config *ServerConfig) {
+func Init(cfg *ServerConfig) {
 	srvCfg := selectConfigFile()
 	file, err := ioutil.ReadFile(srvCfg)
 	if err != nil {
 		log.Fatalf("f6918311 read %s fail, err(%s)\n", srvCfg, err)
 	}
-	err = json.Unmarshal(file[:], config)
+	err = json.Unmarshal(file[:], cfg)
 	if err != nil {
 		log.Fatalf("f6918311 Unmarshal [%v] fail, err(%s)\n", string(file[:]), err)
 	}
@@ -36,11 +35,11 @@ func GetPublicDNS() []string {
 }
 
 func (srv *ServerConfig) IsConnectMode() bool {
-	return srv.ServerMode == "connect"
+	return srv.RepeaterPort == 53
 }
 
 func (srv *ServerConfig) IsProxy() bool {
-	return srv.ServerMode == "proxy"
+	return !srv.IsConnectMode()
 }
 
 func (srv *ServerConfig) GetRepeaterPort() int {
