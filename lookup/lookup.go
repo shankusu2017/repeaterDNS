@@ -206,5 +206,5 @@ func Resolve(clientAddr net.Addr, b []byte) {
 	if len(rsp) > 0 {
 		listener.Send(clientAddr, rsp)
 	}
-	log.Printf("INFO c7a8a141 resolved by cache, domain:%s, rsp:%s\n", domain, string(rsp))
+	log.Printf("INFO c7a8a141 resolved domain:%s, rsp:%s\n", domain, string(rsp))
 }

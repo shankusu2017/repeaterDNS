@@ -27,7 +27,7 @@ func StartLoop() {
 }
 
 func loopRcv() {
-	log.Printf("DEBUG 9d5ff164 listen start\n")
+	log.Printf("DEBUG 95514e81 repeaterSRV listen start\n")
 	for {
 		buf := make([]byte, constant.Size256K)
 		n, clientAddr, err := srvConn.ReadFrom(buf)

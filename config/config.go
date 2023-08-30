@@ -21,6 +21,10 @@ var (
 	mainCfg *ServerConfig
 )
 
+const (
+	DebugFlag = true
+)
+
 func Init(cfg *ServerConfig) {
 	srvCfg := selectConfigFile()
 	file, err := ioutil.ReadFile(srvCfg)
