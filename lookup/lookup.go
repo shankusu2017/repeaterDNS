@@ -203,11 +203,18 @@ func lookHost(req []byte, domain string) []byte {
 
 func Resolve(clientAddr net.Addr, b []byte) {
 	request := proto.Buf2DNSReq(b)
+	if len(request.Questions) < 1 {
+		if config.DebugFlag {
+			log.Printf("WARN 47defd8c question.len is 0\n")
+		}
+		return
+	}
 	domain := string(request.Questions[0].Name)
 	rsp := lookHost(b, domain)
 	if len(rsp) > 0 {
 		listener.Send(clientAddr, rsp)
 	}
+	log.Printf("INFO c7a8a141 rcv req domain:%s, cliAddr:%s\n", domain, clientAddr.String())
 	if config.DebugFlag {
 		log.Printf("INFO c7a8a141 resolved domain:%s, rsp:%s\n", domain, string(rsp))
 	}
