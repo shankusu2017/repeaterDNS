@@ -22,7 +22,7 @@ var (
 )
 
 const (
-	DebugFlag = true
+	DebugFlag = false
 )
 
 func Init(cfg *ServerConfig) {
