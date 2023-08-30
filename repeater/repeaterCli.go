@@ -8,7 +8,7 @@ import (
 
 func SendReq2OutsideAndRcvRsp(b []byte) []byte {
 	if config.DebugFlag {
-		log.Printf("DEBUG 8da5ed91 send req to repeaterSrv\n")
+		log.Printf("DEBUG 8da5ed91 send req to repeaterSrv, b.len:%d\n", len(b))
 	}
 	// 加密
 	cipherText := utils.AESCrypt(b, config.GetIV16(), config.GetKey16())
