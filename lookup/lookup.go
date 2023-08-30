@@ -208,5 +208,7 @@ func Resolve(clientAddr net.Addr, b []byte) {
 	if len(rsp) > 0 {
 		listener.Send(clientAddr, rsp)
 	}
-	log.Printf("INFO c7a8a141 resolved domain:%s, rsp:%s\n", domain, string(rsp))
+	if config.DebugFlag {
+		log.Printf("INFO c7a8a141 resolved domain:%s, rsp:%s\n", domain, string(rsp))
+	}
 }
