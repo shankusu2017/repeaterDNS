@@ -35,7 +35,7 @@ func loopRcv() {
 			log.Printf("84ded1d7 ERROR err:%s, add:%s\n", err.Error(), clientAddr.String())
 			continue
 		}
-		log.Printf("DEBUG 89aa4cad rcv request from:%s\n", clientAddr.String())
+		log.Printf("DEBUG b4da36b8 rcv request from:%s\n", clientAddr.String())
 		buf = buf[:n]
 		go send2PublicDNSAndRepater2Cli(clientAddr, buf)
 	}
