@@ -50,7 +50,7 @@ func send2PublicDNSAndRepeater2Cli(clientAddr net.Addr, b []byte) {
 	}
 
 	{
-		request := proto.Buf2DNSReq(b)
+		request := proto.Buf2DNSReq(plainText)
 		if len(request.Questions) < 1 {
 			log.Printf("WARN b2717e56 question.len is 0\n")
 		}
