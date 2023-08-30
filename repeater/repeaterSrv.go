@@ -3,6 +3,7 @@ package repeater
 import (
 	"github.com/shankusu2017/constant"
 	"github.com/shankusu2017/repeaterDNS/config"
+	"github.com/shankusu2017/repeaterDNS/proto"
 	"github.com/shankusu2017/utils"
 	"log"
 	"net"
@@ -35,18 +36,28 @@ func loopRcv() {
 			log.Printf("84ded1d7 ERROR err:%s, add:%s\n", err.Error(), clientAddr.String())
 			continue
 		}
-		log.Printf("DEBUG b4da36b8 rcv request from:%s\n", clientAddr.String())
 		buf = buf[:n]
-		go send2PublicDNSAndRepater2Cli(clientAddr, buf)
+		go send2PublicDNSAndRepeater2Cli(clientAddr, buf)
 	}
 }
 
-func send2PublicDNSAndRepater2Cli(clientAddr net.Addr, b []byte) {
+func send2PublicDNSAndRepeater2Cli(clientAddr net.Addr, b []byte) {
 	// 解密来自客户端的消息
 	plainText, err := utils.AESDeCrypt(b, config.GetIV16(), config.GetKey16())
 	if err != nil {
 		log.Printf("ERROR 342adfe9 invalid.b.len:%d\n", len(b))
 		return
+	}
+
+	{
+		request := proto.Buf2DNSReq(b)
+		if len(request.Questions) < 1 {
+			log.Printf("WARN b2717e56 question.len is 0\n")
+		}
+		if config.DebugFlag {
+			domain := string(request.Questions[0].Name)
+			log.Printf("INFO ed4ad3b9 rcv req domain: %s\n", domain)
+		}
 	}
 
 	// 转发给公共服务器
