@@ -192,8 +192,8 @@ func lookHost(req []byte, domain string) []byte {
 		buf = repeater.SendReq2OutsideAndRcvRsp(req)
 	}
 
-	if config.DebugFlag {
-		log.Printf("DEBUG 34d90af9 domain:%s, dns:%s\n", domain, dns)
+	if config.DebugFlag || config.DebugPAC {
+		log.Printf("DEBUG 34d90af9 domain:%s, isLocal:%v, dns:%s\n", domain, isLocalDns, dns)
 	}
 
 	setRecord(domain, buf)
@@ -214,7 +214,6 @@ func Resolve(clientAddr net.Addr, b []byte) {
 	if len(rsp) > 0 {
 		listener.Send(clientAddr, rsp)
 	}
-	log.Printf("INFO c7a8a141 rcv req domain:%s, cliAddr:%s\n", domain, clientAddr.String())
 	if config.DebugFlag {
 		log.Printf("INFO c7a8a141 resolved domain:%s, rsp:%s\n", domain, string(rsp))
 	}

@@ -23,6 +23,7 @@ var (
 
 const (
 	DebugFlag = false
+	DebugPAC  = true
 )
 
 func Init(cfg *ServerConfig) {
