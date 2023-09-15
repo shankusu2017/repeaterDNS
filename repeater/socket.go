@@ -24,7 +24,7 @@ func SendAndRcv(dns string, port int, b []byte) []byte {
 
 	n, err = udp.Read(buf[:])
 	if err != nil {
-		log.Printf("ERROR d098e4a5 error:%s\n", err.Error())
+		log.Printf("ERROR d098e4a5 error:%s, dns:%s\n", err.Error(), dns)
 		return []byte{}
 	}
 	if n <= 0 {
