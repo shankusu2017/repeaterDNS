@@ -51,6 +51,14 @@ func send2PublicDNSAndRepeater2Cli(clientAddr net.Addr, b []byte) {
 
 	{
 		request := proto.Buf2DNSReq(plainText)
+		if request == nil {
+			log.Printf("ERROR 47e5d70e request is nil\n")
+			return
+		}
+		if request.Questions == nil {
+			log.Printf("ERROR 34025847 length is 0\n")
+			return
+		}
 		if len(request.Questions) < 1 {
 			log.Printf("WARN b2717e56 question.len is 0\n")
 		}
@@ -63,7 +71,7 @@ func send2PublicDNSAndRepeater2Cli(clientAddr net.Addr, b []byte) {
 	// 转发给公共服务器
 	rsp := SendReq2LocalAndRcvRsp(config.GetRandomPublicDNS(), plainText)
 
-	// 先加密，再讲结果发给repeaterCli
+	// 先加密，再将结果发给repeaterCli
 	text := utils.AESCrypt(rsp, config.GetIV16(), config.GetKey16())
 	srvConn.WriteTo(text, clientAddr)
 }
