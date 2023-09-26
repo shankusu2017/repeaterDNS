@@ -203,6 +203,12 @@ func lookHost(req []byte, domain string) []byte {
 
 func Resolve(clientAddr net.Addr, b []byte) {
 	request := proto.Buf2DNSReq(b)
+	if request == nil {
+		if config.DebugFlag {
+			log.Printf("WARN b55eacf1 question is nil\n")
+		}
+		return
+	}
 	if len(request.Questions) < 1 {
 		if config.DebugFlag {
 			log.Printf("WARN 47defd8c question.len is 0\n")
