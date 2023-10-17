@@ -27,7 +27,7 @@ func (r *RecordT) GetRsp() []byte {
 }
 
 func (r *RecordT) IsExpired() bool {
-	return r.t.After(time.Now().Add(constant.Time30Min))
+	return time.Now().After(r.t.Add(constant.Time30Min))
 }
 
 type domainT struct {
@@ -222,5 +222,22 @@ func Resolve(clientAddr net.Addr, b []byte) {
 	}
 	if config.DebugFlag {
 		log.Printf("INFO c7a8a141 resolved domain:%s, rsp:%s\n", domain, string(rsp))
+	}
+}
+
+func DeadlineCheck() {
+	lookupMgr.mtx.RLock()
+	defer lookupMgr.mtx.RUnlock()
+
+	var count = 0
+	for domain, record := range lookupMgr.domain2RecodeMap {
+		count++
+		if record.IsExpired() {
+			delete(lookupMgr.domain2RecodeMap, domain)
+		}
+		/* 单次扫描100个即可，太多可能会阻塞 lookupMg */
+		if count > 100 {
+			return
+		}
 	}
 }

@@ -2,9 +2,11 @@ package listener
 
 import (
 	"github.com/shankusu2017/constant"
+	"github.com/shankusu2017/repeaterDNS/lookup"
 	"log"
 	"net"
 	"sync"
+	"time"
 )
 
 var (
@@ -26,7 +28,7 @@ func Init() {
 	}
 }
 
-func StartLoop(f func(net.Addr, []byte)) {
+func StartLoopResolve(f func(net.Addr, []byte)) {
 	go loopRcv(f)
 }
 
@@ -47,4 +49,17 @@ func loopRcv(f func(net.Addr, []byte)) {
 
 func Send(addr net.Addr, b []byte) {
 	listener.WriteTo(b, addr)
+}
+
+func StartLoopDeadlineCheck() {
+	ticker1 := time.NewTicker(5 * time.Second)
+	// 一定要调用Stop()，回收资源
+	defer ticker1.Stop()
+	go func(t *time.Ticker) {
+		for {
+			// 每5秒中从chan t.C 中读取一次
+			<-t.C
+			lookup.DeadlineCheck()
+		}
+	}(ticker1)
 }
