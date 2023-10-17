@@ -1,2 +1,1 @@
-## TODO
-- 吃内存
+A dns proxy server with pac functionality
