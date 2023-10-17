@@ -24,10 +24,12 @@ func main() {
 	}
 
 	if cfg.IsConnectMode() {
-		listener.StartLoop(lookup.Resolve)
+		listener.StartLoopResolve(lookup.Resolve)
 	} else {
 		repeater.StartLoop()
 	}
+
+	lookup.StartLoopDeadlineCheck()
 
 	time.Sleep(time.Hour * 65536)
 }

@@ -26,7 +26,7 @@ func Init() {
 	}
 }
 
-func StartLoop(f func(net.Addr, []byte)) {
+func StartLoopResolve(f func(net.Addr, []byte)) {
 	go loopRcv(f)
 }
 
