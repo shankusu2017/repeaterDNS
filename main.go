@@ -29,7 +29,7 @@ func main() {
 		repeater.StartLoop()
 	}
 
-	listener.StartLoopDeadlineCheck()
+	lookup.StartLoopDeadlineCheck()
 
 	time.Sleep(time.Hour * 65536)
 }

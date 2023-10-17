@@ -225,7 +225,7 @@ func Resolve(clientAddr net.Addr, b []byte) {
 	}
 }
 
-func DeadlineCheck() {
+func deadlineCheck() {
 	lookupMgr.mtx.RLock()
 	defer lookupMgr.mtx.RUnlock()
 
@@ -240,4 +240,17 @@ func DeadlineCheck() {
 			return
 		}
 	}
+}
+
+func StartLoopDeadlineCheck() {
+	ticker1 := time.NewTicker(5 * time.Second)
+	// 一定要调用Stop()，回收资源
+	defer ticker1.Stop()
+	go func(t *time.Ticker) {
+		for {
+			// 每5秒中从chan t.C 中读取一次
+			<-t.C
+			deadlineCheck()
+		}
+	}(ticker1)
 }
