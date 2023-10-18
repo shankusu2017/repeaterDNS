@@ -33,6 +33,7 @@ func (r *RecordT) IsExpired() bool {
 type domainT struct {
 	dns     string
 	isLocal bool
+	//t      time.Time // 记录生成的时间(记录均有有效期)
 }
 
 func (r *domainT) GetDns() string {
@@ -175,7 +176,8 @@ func setRecord(domain string, rsp []byte) {
 
 	lookupMgr.mtx.Lock()
 	defer lookupMgr.mtx.Unlock()
-	lookupMgr.domain2RecodeMap[domain] = record
+	//lookupMgr.domain2RecodeMap[domain] = record
+	//TODO 有内存泄漏，暂不清除是哪里的泄漏，先屏蔽这里再说
 }
 
 func lookHost(req []byte, domain string) []byte {
@@ -244,13 +246,13 @@ func deadlineCheck() {
 
 func StartLoopDeadlineCheck() {
 	ticker1 := time.NewTicker(5 * time.Second)
-	// 一定要调用Stop()，回收资源
-	defer ticker1.Stop()
 	go func(t *time.Ticker) {
 		for {
 			// 每5秒中从chan t.C 中读取一次
 			<-t.C
 			deadlineCheck()
 		}
+		// 一定要调用Stop()，回收资源
+		defer ticker1.Stop()
 	}(ticker1)
 }
