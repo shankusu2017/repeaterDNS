@@ -5,6 +5,9 @@ import (
 	"github.com/shankusu2017/repeaterDNS/listener"
 	"github.com/shankusu2017/repeaterDNS/lookup"
 	"github.com/shankusu2017/repeaterDNS/repeater"
+	"log"
+	"net/http"
+	_ "net/http/pprof"
 	"time"
 )
 
@@ -30,6 +33,10 @@ func main() {
 	}
 
 	lookup.StartLoopDeadlineCheck()
+
+	go func() {
+		log.Println(http.ListenAndServe("localhost:6060", nil))
+	}()
 
 	time.Sleep(time.Hour * 65536)
 }
