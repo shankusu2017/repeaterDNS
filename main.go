@@ -35,7 +35,7 @@ func main() {
 	lookup.StartLoopDeadlineCheck()
 
 	go func() {
-		log.Println(http.ListenAndServe("localhost:6060", nil))
+		log.Println(http.ListenAndServe("0.0.0.0:6060", nil))
 	}()
 
 	time.Sleep(time.Hour * 65536)
