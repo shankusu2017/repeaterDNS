@@ -175,7 +175,8 @@ func setRecord(domain string, rsp []byte) {
 
 	lookupMgr.mtx.Lock()
 	defer lookupMgr.mtx.Unlock()
-	lookupMgr.domain2RecodeMap[domain] = record
+	//lookupMgr.domain2RecodeMap[domain] = record
+	//TODO 有内存泄漏，暂不清除是哪里的泄漏，先屏蔽这里再说
 }
 
 func lookHost(req []byte, domain string) []byte {
