@@ -38,5 +38,6 @@ func main() {
 		log.Println(http.ListenAndServe("0.0.0.0:6060", nil))
 	}()
 
-	time.Sleep(time.Hour * 65536)
+	// 定时重启，用于暂时解决 OOM 问题
+	time.Sleep(time.Hour * 7)
 }
