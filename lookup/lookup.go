@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"github.com/shankusu2017/constant"
 	"github.com/shankusu2017/repeaterDNS/config"
-	"github.com/shankusu2017/repeaterDNS/listener"
 	"github.com/shankusu2017/repeaterDNS/proto"
 	"github.com/shankusu2017/repeaterDNS/repeater"
 	"io"
@@ -203,7 +202,7 @@ func lookHost(req []byte, domain string) []byte {
 	return buf
 }
 
-func Resolve(clientAddr net.Addr, b []byte) {
+func Resolve(srvAddr *net.UDPConn, clientAddr net.Addr, b []byte) {
 	request := proto.Buf2DNSReq(b)
 	if request == nil {
 		if config.DebugFlag {
@@ -220,7 +219,7 @@ func Resolve(clientAddr net.Addr, b []byte) {
 	domain := string(request.Questions[0].Name)
 	rsp := lookHost(b, domain)
 	if len(rsp) > 0 {
-		listener.Send(clientAddr, rsp)
+		srvAddr.WriteTo(rsp, clientAddr)
 	}
 	if config.DebugFlag {
 		log.Printf("INFO c7a8a141 resolved domain:%s, rsp:%s\n", domain, string(rsp))

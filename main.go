@@ -5,8 +5,6 @@ import (
 	"github.com/shankusu2017/repeaterDNS/listener"
 	"github.com/shankusu2017/repeaterDNS/lookup"
 	"github.com/shankusu2017/repeaterDNS/repeater"
-	"log"
-	"net/http"
 	_ "net/http/pprof"
 	"time"
 )
@@ -33,10 +31,6 @@ func main() {
 	}
 
 	lookup.StartLoopDeadlineCheck()
-
-	go func() {
-		log.Println(http.ListenAndServe("0.0.0.0:6060", nil))
-	}()
 
 	// 定期重启，用于暂时解决 OOM 问题
 	time.Sleep(time.Hour * 1)

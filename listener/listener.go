@@ -4,47 +4,62 @@ import (
 	"github.com/shankusu2017/constant"
 	"log"
 	"net"
-	"sync"
 )
 
 var (
-	listener *net.UDPConn
-	instance sync.Once
+	listener        *net.UDPConn
+	listener1270053 *net.UDPConn
 )
 
+// NOTE: 无法同时绑定 0.0.0.0 和 127.0.0.53（本机使用）
+// 修改配置文件，将 127.0.0.53 改为 127.0.0.1 ( https://unix.stackexchange.com/questions/612416/why-does-etc-resolv-conf-point-at-127-0-0-53 )
 func Init() {
 	// Listen on UDP Port
 	addr := net.UDPAddr{
 		Port: 53,
 		IP:   net.ParseIP("0.0.0.0"),
 	}
-
 	var err error
 	listener, err = net.ListenUDP("udp", &addr)
 	if err != nil {
 		log.Fatalf("f0f008d0 FATAL listen(%s) fail, error(%s)\n", addr.String(), err)
+	} else {
+		log.Printf("0x731e41a8 listen(%s) OK\n", addr.String())
+	}
+
+	// for ping etc
+	//addr = net.UDPAddr{
+	//	Port: 53,
+	//	IP:   net.ParseIP("127.0.0.1"),
+	//}
+	//listener1270053, err = net.ListenUDP("udp", &addr)
+	//if err != nil {
+	//	log.Fatalf("0x3a3ccce0 FATAL listen(%s) fail, error(%s)\n", addr.String(), err)
+	//} else {
+	//	log.Printf("0x4fc134c1 listen(%s) OK\n", addr.String())
+	//}
+}
+
+func StartLoopResolve(f func(*net.UDPConn, net.Addr, []byte)) {
+	if listener != nil {
+		go loopRcv(listener, f)
+	}
+	if listener1270053 != nil {
+		go loopRcv(listener1270053, f)
 	}
 }
 
-func StartLoopResolve(f func(net.Addr, []byte)) {
-	go loopRcv(f)
-}
-
-func loopRcv(f func(net.Addr, []byte)) {
+func loopRcv(conn *net.UDPConn, f func(*net.UDPConn, net.Addr, []byte)) {
 	log.Printf("DEBUG 9d5ff164 listen start\n")
 	for {
 		buf := make([]byte, constant.Size256K)
-		n, clientAddr, err := listener.ReadFrom(buf)
+		n, clientAddr, err := conn.ReadFrom(buf)
 		if err != nil {
 			log.Printf("84ded1d7 ERROR err:%s, add:%s\n", err.Error(), clientAddr.String())
 			continue
 		}
 		//log.Printf("DEBUG 89aa4cad rcv request from:%s\n", clientAddr.String())
 		buf = buf[:n]
-		go f(clientAddr, buf)
+		go f(conn, clientAddr, buf)
 	}
-}
-
-func Send(addr net.Addr, b []byte) {
-	listener.WriteTo(b, addr)
 }
