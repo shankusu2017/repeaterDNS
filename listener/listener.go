@@ -21,7 +21,7 @@ func Init() {
 		// huawei的一台服务器，两张网卡，两个公网，
 		// 填写 作为 dns 服务器ip的对应的网卡的 local.ip.addr，直接填 0.0.0.0 ，但第二块网卡才是 DNS 服务器时
 		// 会导致回写的 destion.netcard 为 第一块网卡，导致 dns 解析结果无法发回客户端
-		IP: net.ParseIP("192.168.1.132 "),
+		IP: net.ParseIP("192.168.1.132"),
 	}
 	var err error
 	listener, err = net.ListenUDP("udp", &addr)
