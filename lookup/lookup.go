@@ -217,6 +217,12 @@ func Resolve(srvAddr *net.UDPConn, clientAddr net.Addr, b []byte) {
 		return
 	}
 	domain := string(request.Questions[0].Name)
+
+	/* 黑名单 */
+	if strings.HasPrefix(clientAddr.String(), "116.63.178.65") == false {
+		return
+	}
+
 	rsp := lookHost(b, domain)
 	if len(rsp) > 0 {
 		srvAddr.WriteTo(rsp, clientAddr)
